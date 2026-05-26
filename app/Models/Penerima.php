@@ -18,7 +18,7 @@ class Penerima extends Model
         'nama_lengkap',
         'alamat',
         'jenis_bantuan_id',
-        'kategori_id', // GANTI INI
+        'nama_kategori',
         'status_penyaluran',
         'foto'
     ];

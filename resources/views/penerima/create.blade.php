@@ -1,124 +1,349 @@
 @extends('layouts.master')
 
 @section('content')
-<h2 class="font-semibold text-xl text-gray-800 leading-tight">
-    Tambah Data Penerima Bantuan
-</h2>
 
-<div class="py-12">
-    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white shadow-sm sm:rounded-lg p-6">
+<style>
+    body{
+        background-color: #f3f4f6;
+        font-family: Arial, sans-serif;
+    }
 
-            {{-- ERROR VALIDATION --}}
-            @if ($errors->any())
-                <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+    .card-form{
+        max-width: 900px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
 
-            <form action="{{ route('penerima.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+    .title{
+        font-size: 28px;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 5px;
+    }
 
-                {{-- NIK --}}
-                <div class="mb-4">
-                    <label>NIK</label>
-                    <input type="text" name="nik"
-                        value="{{ old('nik') }}"
-                        pattern="[0-9]{16}"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        required>
-                </div>
+    .subtitle{
+        color: #6b7280;
+        margin-bottom: 30px;
+    }
 
-                {{-- Nama --}}
-                <div class="mb-4">
-                    <label>Nama Lengkap</label>
-                    <input type="text" name="nama_lengkap"
-                        value="{{ old('nama_lengkap') }}"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        required>
-                </div>
+    .alert-error{
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
 
-                {{-- Alamat --}}
-                <div class="mb-4">
-                    <label>Alamat</label>
-                    <textarea name="alamat"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        required>{{ old('alamat') }}</textarea>
-                </div>
+    .grid{
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        gap: 20px;
+    }
 
-                {{-- Jenis Bantuan --}}
-                <div class="mb-4">
-                    <label>Jenis Bantuan</label>
-                    <select name="jenis_bantuan_id"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        required>
-                        <option value="">-- Pilih --</option>
-                        
-                        @foreach($jenis as $j)
-                            <option value="{{ $j->id }}">
-                                {{ $j->nama_bantuan }}
-                            </option>
-                        @endforeach
+    .full{
+        grid-column: span 2;
+    }
 
-                    </select>
-                </div>
+    .form-group{
+        display: flex;
+        flex-direction: column;
+    }
 
-                {{-- STATUS (WAJIB ADA) --}}
-                <div class="mb-6">
-                    <label>Status Penyaluran</label>
-                    <select name="status_penyaluran"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        required>
-                        <option value="">-- Pilih Status --</option>
-                        <option value="Belum Disalurkan">Belum Disalurkan</option>
-                        <option value="Sudah Disalurkan">Sudah Disalurkan</option>
-                    </select>
-                </div>
+    .form-group label{
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #374151;
+    }
 
-                <div class="mb-6">
-                    <label>Kategori</label>
-                    <select name="kategori_id"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        required>
+    .form-control{
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: 0.3s;
+    }
 
-                        <option value="">-- Pilih Kategori --</option>
+    .form-control:focus{
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+    }
 
-                        @foreach($kategori as $k)
-                            <option value="{{ $k->id }}">
-                                {{ $k->nama_kategori }}
-                            </option>
-                        @endforeach
+    textarea.form-control{
+        min-height: 100px;
+        resize: vertical;
+    }
 
-                    </select>
-                </div>
+    .button-group{
+        margin-top: 30px;
+        display: flex;
+        gap: 12px;
+    }
 
-                {{-- FOTO --}}
-                <div class="mb-6">
-                    <label>Foto</label>
-                    <input type="file" name="foto"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
-                </div>
+    .btn{
+        padding: 12px 18px;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
 
-                {{-- Tombol --}}
-                <div class="flex items-center gap-4">
-                    <button type="submit"
-                        style="background:green;color:white;padding:10px 15px;border-radius:6px;">
-                        Simpan Data
-                    </button>
+    .btn-save{
+        background: #16a34a;
+    }
 
-                    <a href="{{ route('penerima.index') }}" class="btn btn-secondary">
-                        Batal
-                    </a>
-                </div>
+    .btn-save:hover{
+        background: #15803d;
+    }
 
-            </form>
+    .btn-cancel{
+        background: #6b7280;
+    }
+
+    .btn-cancel:hover{
+        background: #4b5563;
+    }
+
+    .preview{
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        margin-top: 10px;
+        display: none;
+    }
+
+    @media(max-width:768px){
+
+        .grid{
+            grid-template-columns: 1fr;
+        }
+
+        .full{
+            grid-column: span 1;
+        }
+
+        .button-group{
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="card-form">
+
+    <div class="title">
+        Tambah Data Penerima Bantuan
+    </div>
+
+    <div class="subtitle">
+        Silakan isi data penerima bantuan dengan lengkap dan benar.
+    </div>
+
+    {{-- ERROR VALIDATION --}}
+    @if ($errors->any())
+
+        <div class="alert-error">
+
+            <ul>
+
+                @foreach ($errors->all() as $error)
+
+                    <li>• {{ $error }}</li>
+
+                @endforeach
+
+            </ul>
 
         </div>
-    </div>
+
+    @endif
+
+    <form action="{{ route('penerima.store') }}"
+          method="POST"
+          enctype="multipart/form-data">
+
+        @csrf
+
+        <div class="grid">
+
+            {{-- NIK --}}
+            <div class="form-group">
+
+                <label>NIK</label>
+
+                <input type="text"
+                       name="nik"
+                       value="{{ old('nik') }}"
+                       pattern="[0-9]{16}"
+                       maxlength="16"
+                       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                       class="form-control"
+                       placeholder="Masukkan 16 digit NIK"
+                       required>
+
+            </div>
+
+            {{-- NAMA --}}
+            <div class="form-group">
+
+                <label>Nama Lengkap</label>
+
+                <input type="text"
+                       name="nama_lengkap"
+                       value="{{ old('nama_lengkap') }}"
+                       class="form-control"
+                       placeholder="Masukkan nama lengkap"
+                       required>
+
+            </div>
+
+            {{-- ALAMAT --}}
+            <div class="form-group full">
+
+                <label>Alamat</label>
+
+                <textarea name="alamat"
+                          class="form-control"
+                          placeholder="Masukkan alamat lengkap"
+                          required>{{ old('alamat') }}</textarea>
+
+            </div>
+
+            {{-- JENIS BANTUAN --}}
+            <div class="form-group">
+
+                <label>Jenis Bantuan</label>
+
+                <select name="jenis_bantuan_id"
+                        class="form-control"
+                        required>
+
+                    <option value="">-- Pilih Bantuan --</option>
+
+                    @foreach($jenis as $j)
+
+                        <option value="{{ $j->id }}">
+
+                            {{ $j->nama_bantuan }}
+
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+
+            {{-- KATEGORI --}}
+            <div class="form-group">
+
+                <label>Kategori</label>
+
+                <select name="nama_kategori"
+                        class="form-control"
+                        required>
+
+                    <option value="">-- Pilih Kategori --</option>
+
+                    @foreach($kategori as $k)
+
+                        <option value="{{ $k->nama_kategori }}">
+
+                            {{ $k->nama_kategori }}
+
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+
+            {{-- STATUS --}}
+            <div class="form-group">
+
+                <label>Status Penyaluran</label>
+
+                <select name="status_penyaluran"
+                        class="form-control"
+                        required>
+
+                    <option value="">-- Pilih Status --</option>
+
+                    <option value="Belum Disalurkan">
+
+                        Belum Disalurkan
+
+                    </option>
+
+                    <option value="Sudah Disalurkan">
+
+                        Sudah Disalurkan
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            {{-- FOTO --}}
+            <div class="form-group">
+
+                <label>Foto</label>
+
+                <input type="file"
+                       name="foto"
+                       class="form-control"
+                       accept="image/*"
+                       onchange="previewFoto(event)">
+
+                <img id="preview" class="preview">
+
+            </div>
+
+        </div>
+
+        {{-- BUTTON --}}
+        <div class="button-group">
+
+            <button type="submit"
+                    class="btn btn-save">
+
+                Simpan Data
+
+            </button>
+
+            <a href="{{ route('penerima.index') }}"
+               class="btn btn-cancel">
+
+                Batal
+
+            </a>
+
+        </div>
+
+    </form>
+
 </div>
+
+<script>
+
+function previewFoto(event){
+
+    const preview = document.getElementById('preview');
+
+    preview.src = URL.createObjectURL(event.target.files[0]);
+
+    preview.style.display = 'block';
+}
+
+</script>
+
 @endsection

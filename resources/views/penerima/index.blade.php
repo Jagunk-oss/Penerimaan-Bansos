@@ -41,7 +41,7 @@
             <td>{{ $item->nama_lengkap }}</td>
             <td>{{ $item->alamat }}</td>
             <td>{{ $item->jenisBantuan->nama_bantuan ?? '-' }}</td>
-            
+
             <!-- STATUS PENYALURAN -->
             <td>{{ $item->status_penyaluran }}</td>
             <td>{{ $item->kategori->nama_kategori ?? '-' }}</td>

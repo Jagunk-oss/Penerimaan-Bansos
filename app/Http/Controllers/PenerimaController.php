@@ -4,65 +4,81 @@ namespace App\Http\Controllers;
 
 use App\Models\Penerima;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Models\JenisBantuan;
 use App\Models\Kategori;
 
 class PenerimaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan semua data penerima
      */
     public function index()
     {
-        $penerimas = Penerima::with('jenisBantuan','kategori')->get();
+        $penerimas = Penerima::with('jenisBantuan')->get();
+
         return view('penerima.index', compact('penerimas'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form tambah data
      */
     public function create()
     {
         $jenis = JenisBantuan::all();
+
         $kategori = Kategori::all();
 
-    return view('penerima.create', compact('jenis','kategori'));
+        return view('penerima.create', compact('jenis', 'kategori'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data baru
      */
     public function store(Request $request)
     {
-    $request->validate([
-        'nik' => 'required|digits:16',
-        'nama_lengkap' => 'required',
-        'alamat' => 'required',
-        'jenis_bantuan_id' => 'required',
-        'status_penyaluran' => 'required',
-        'kategori_id' => 'required',
-        'foto' => 'image|mimes:jpg,png,jpeg|max:2048'
-    ]);
+        $request->validate([
 
-    $data = $request->all();
+            'nik' => 'required|digits:16',
+            'nama_lengkap' => 'required',
+            'alamat' => 'required',
+            'jenis_bantuan_id' => 'required',
+            'nama_kategori' => 'required',
+            'status_penyaluran' => 'required',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
 
-    if ($request->hasFile('foto')) {
-        $file = $request->file('foto');
-        $namaFile = time().'_'.$file->getClientOriginalName();
-        $file->move(public_path('foto'), $namaFile);
+        ]);
 
-        $data['foto'] = $namaFile;
+        $data = $request->all();
+
+        // AMBIL NAMA BANTUAN DARI RELASI
+        $jenis = JenisBantuan::find($request->jenis_bantuan_id);
+
+        if ($jenis) {
+            $data['jenis_bantuan'] = $jenis->nama_bantuan;
+        }
+
+        // UPLOAD FOTO
+        if ($request->hasFile('foto')) {
+
+            $file = $request->file('foto');
+
+            $namaFile = time().'_'.$file->getClientOriginalName();
+
+            $file->move(public_path('foto'), $namaFile);
+
+            $data['foto'] = $namaFile;
+        }
+
+        // SIMPAN DATA
+        Penerima::create($data);
+
+        return redirect()
+                ->route('penerima.index')
+                ->with('success', 'Data berhasil ditambahkan');
     }
 
-    Penerima::create($data);
-
-    return redirect()->route('penerima.index')
-        ->with('success', 'Data berhasil ditambahkan');
-}
-
     /**
-     * Display the specified resource.
+     * Menampilkan detail data
      */
     public function show(string $id)
     {
@@ -70,72 +86,96 @@ class PenerimaController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Menampilkan form edit
      */
     public function edit(string $id)
     {
         $penerima = Penerima::findOrFail($id);
-        $jenis = JenisBantuan::all();
-        $kategori = Kategori::all(); // TAMBAHKAN
 
-        return view('penerima.edit', compact('penerima', 'jenis','kategori'));
+        $jenis = JenisBantuan::all();
+
+        $kategori = Kategori::all();
+
+        return view('penerima.edit', compact('penerima', 'jenis', 'kategori'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update data
      */
     public function update(Request $request, string $id)
     {
         $request->validate([
-        'nik' => 'required|digits:16',
-        'nama_lengkap' => 'required',
-        'alamat' => 'required',
-        'jenis_bantuan_id' => 'required',
-        'status_penyaluran' => 'required',
-        'foto' => 'image|mimes:jpg,png,jpeg|max:2048'
-    ]);
 
-    $penerima = Penerima::find($id);
-    $data = $request->all();
+            'nik' => 'required|digits:16',
+            'nama_lengkap' => 'required',
+            'alamat' => 'required',
+            'jenis_bantuan_id' => 'required',
+            'nama_kategori' => 'required',
+            'status_penyaluran' => 'required',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
 
-    // CEK kalau upload foto baru
-    if ($request->hasFile('foto')) {
+        ]);
 
-        // HAPUS FOTO LAMA
-        if ($penerima->foto && file_exists(public_path('foto/'.$penerima->foto))) {
-            unlink(public_path('foto/'.$penerima->foto));
+        $penerima = Penerima::findOrFail($id);
+
+        $data = $request->all();
+
+        // AMBIL NAMA BANTUAN
+        $jenis = JenisBantuan::find($request->jenis_bantuan_id);
+
+        if ($jenis) {
+            $data['jenis_bantuan'] = $jenis->nama_bantuan;
         }
 
-        // SIMPAN FOTO BARU
-        $file = $request->file('foto');
-        $namaFile = time().'_'.$file->getClientOriginalName();
-        $file->move(public_path('foto'), $namaFile);
+        // FOTO BARU
+        if ($request->hasFile('foto')) {
 
-        $data['foto'] = $namaFile;
+            // HAPUS FOTO LAMA
+            if (
+                $penerima->foto &&
+                file_exists(public_path('foto/'.$penerima->foto))
+            ) {
+                unlink(public_path('foto/'.$penerima->foto));
+            }
+
+            // SIMPAN FOTO BARU
+            $file = $request->file('foto');
+
+            $namaFile = time().'_'.$file->getClientOriginalName();
+
+            $file->move(public_path('foto'), $namaFile);
+
+            $data['foto'] = $namaFile;
+        }
+
+        // UPDATE DATA
+        $penerima->update($data);
+
+        return redirect()
+                ->route('penerima.index')
+                ->with('success', 'Data berhasil diupdate');
     }
 
-    $penerima->update($data);
-
-    return redirect()->route('penerima.index')
-        ->with('success', 'Data berhasil diupdate');
-}
-
     /**
-     * Remove the specified resource from storage.
+     * Hapus data
      */
     public function destroy(string $id)
     {
         $penerima = Penerima::findOrFail($id);
 
-    // HAPUS FILE FOTO
-    if ($penerima->foto && file_exists(public_path('foto/'.$penerima->foto))) {
-        unlink(public_path('foto/'.$penerima->foto));
-    }
+        // HAPUS FOTO
+        if (
+            $penerima->foto &&
+            file_exists(public_path('foto/'.$penerima->foto))
+        ) {
+            unlink(public_path('foto/'.$penerima->foto));
+        }
 
-    // HAPUS DATA
-    $penerima->delete();
+        // HAPUS DATA
+        $penerima->delete();
 
-    return redirect()->route('penerima.index')
-        ->with('success', 'Data berhasil dihapus');
+        return redirect()
+                ->route('penerima.index')
+                ->with('success', 'Data berhasil dihapus');
     }
 }
