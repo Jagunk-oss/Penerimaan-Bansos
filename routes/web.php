@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenerimaController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/penerima/pdf', [PenerimaController::class, 'exportPdf'])
+    ->name('penerima.pdf');
+    
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -22,5 +25,6 @@ Route::middleware('auth')->group(function () {
     //PENERIMA BANSOS
     Route::resource('penerima', PenerimaController::class);
 });
+
 
 require __DIR__.'/auth.php';

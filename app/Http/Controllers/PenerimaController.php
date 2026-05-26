@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\JenisBantuan;
 use App\Models\Kategori;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenerimaController extends Controller
 {
@@ -137,5 +138,14 @@ class PenerimaController extends Controller
 
     return redirect()->route('penerima.index')
         ->with('success', 'Data berhasil dihapus');
+    }
+
+    public function exportPdf()
+    {
+        $penerimas = Penerima::all();
+
+        $pdf = Pdf::loadView('penerima.pdf', compact('penerimas'));
+
+        return $pdf->download('laporan-penerima-bansos.pdf');
     }
 }

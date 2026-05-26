@@ -58,7 +58,8 @@
                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
                         required>
                         <option value="">-- Pilih --</option>
-                        
+
+                       
                         @foreach($jenis as $j)
                             <option value="{{ $j->id }}">
                                 {{ $j->nama_bantuan }}
