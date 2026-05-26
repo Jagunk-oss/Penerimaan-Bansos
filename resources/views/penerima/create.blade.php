@@ -46,6 +46,20 @@
     .full{
         grid-column: span 2;
     }
+                {{-- Jenis Bantuan --}}
+                <div class="mb-4">
+                    <label>Jenis Bantuan</label>
+                    <select name="jenis_bantuan_id"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+                        required>
+                        <option value="">-- Pilih --</option>
+
+
+                        @foreach($jenis as $j)
+                            <option value="{{ $j->id }}">
+                                {{ $j->nama_bantuan }}
+                            </option>
+                        @endforeach
 
     .form-group{
         display: flex;

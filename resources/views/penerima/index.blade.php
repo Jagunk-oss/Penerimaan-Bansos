@@ -85,4 +85,12 @@
 
 </table>
 
+<<<<<<< HEAD
 @endsection
+=======
+<a href="{{ route('penerima.pdf') }}" class="btn btn-danger mb-3">
+    Cetak PDF
+</a>
+
+@endsection
+>>>>>>> 847e02d1374acd8ad79f80d86cc9fba6e5fb3963
