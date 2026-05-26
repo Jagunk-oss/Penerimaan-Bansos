@@ -85,4 +85,8 @@
 
 </table>
 
+<a href="{{ route('penerima.pdf') }}" class="btn btn-danger mb-3">
+    Cetak PDF
+</a>
+
 @endsection
