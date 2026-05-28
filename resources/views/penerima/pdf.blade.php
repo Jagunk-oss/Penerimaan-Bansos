@@ -40,6 +40,7 @@
                 <th>Nama</th>
                 <th>Alamat</th>
                 <th>Jenis Bantuan</th>
+                <th>Kategori</th>
                 <th>Status Penyaluran</th>
             </tr>
         </thead>
@@ -52,6 +53,7 @@
                 <td>{{ $item->nama_lengkap }}</td>
                 <td>{{ $item->alamat }}</td>
                 <td>{{ $item->jenis_bantuan }}</td>
+                <td>{{ $item->nama_kategori }}</td>
                 <td>{{ $item->status_penyaluran }}</td>
             </tr>
             @endforeach

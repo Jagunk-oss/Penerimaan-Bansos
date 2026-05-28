@@ -14,14 +14,15 @@ class Penerima extends Model
     protected $table = 'penerima';
 
     protected $fillable = [
-        'nik',
-        'nama_lengkap',
-        'alamat',
-        'jenis_bantuan_id',
-        'nama_kategori',
-        'status_penyaluran',
-        'foto'
-    ];
+    'nik',
+    'nama_lengkap',
+    'alamat',
+    'jenis_bantuan_id',
+    'jenis_bantuan',
+    'nama_kategori',
+    'status_penyaluran',
+    'foto'
+];
 
     public function jenisBantuan()
     {
