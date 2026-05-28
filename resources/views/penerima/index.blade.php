@@ -141,7 +141,15 @@
             {{ session('success') }}
         </div>
     @endif
+        <form method="GET" action="{{ route('penerima.index') }}" style="margin-bottom:15px;">
+            <input type="text" name="search" placeholder="Cari nama / NIK"
+                style="padding:8px; border-radius:8px; border:1px solid #ccc;">
 
+        <button type="submit"
+                style="padding:8px 12px; border:none; border-radius:8px; background:#0f172a; color:white;">
+            Cari
+        </button>
+    </form>
     <table>
         <thead>
             <tr>
@@ -157,7 +165,7 @@
         </thead>
 
         <tbody>
-            @forelse($penerimas as $item)
+            @forelse($penerima as $item)
             <tr>
                 <td>{{ $item->nik ?? '-' }}</td>
                 <td>{{ $item->nama_lengkap ?? '-' }}</td>
@@ -205,6 +213,8 @@
             @endforelse
         </tbody>
     </table>
+
+{{ $penerima->links() }}
 
     <div class="bottom-bar">
         <a href="{{ route('penerima.pdf') }}" class="btn btn-danger">Cetak PDF</a>

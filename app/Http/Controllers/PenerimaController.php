@@ -13,11 +13,18 @@ class PenerimaController extends Controller
     /**
      * Menampilkan semua data penerima
      */
-    public function index()
+    public function index(Request $request)
     {
-        $penerimas = Penerima::with('jenisBantuan')->get();
+        $query = Penerima::query();
 
-        return view('penerima.index', compact('penerimas'));
+        if ($request->search) {
+            $query->where('nama_lengkap', 'like', '%' . $request->search . '%')
+                ->orWhere('nik', 'like', '%' . $request->search . '%');
+        }
+
+        $penerima = $query->paginate(10);
+        $penerima->appends($request->all());
+        return view('penerima.index', compact('penerima'));
     }
 
     /**
@@ -182,9 +189,9 @@ class PenerimaController extends Controller
 
     public function exportPdf()
     {
-        $penerimas = Penerima::all();
+        $penerima = Penerima::all();
 
-        $pdf = Pdf::loadView('penerima.pdf', compact('penerimas'));
+        $pdf = Pdf::loadView('penerima.pdf', compact('penerima'));
 
         return $pdf->download('laporan-penerima-bansos.pdf');
     }
