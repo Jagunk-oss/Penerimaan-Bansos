@@ -46,7 +46,7 @@
         </thead>
 
         <tbody>
-            @foreach($penerimas as $item)
+            @foreach($penerima as $item)
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $item->nik }}</td>
