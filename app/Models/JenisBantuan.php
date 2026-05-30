@@ -15,3 +15,4 @@ class JenisBantuan extends Model
         return $this->hasMany(Penerima::class);
     }
 }
+// update contributor
